@@ -26,6 +26,7 @@ const CATS = {
 
 const EXPENSE_TAGS = ["餐飲", "交通", "生活", "娛樂", "醫療", "其他"];
 
+// 分类颜色配置（多色方案）
 const CATEGORY_COLORS = {
   "餐飲": { bg: "#f5d4a3", text: "#8b6f47" },
   "交通": { bg: "#a3d4f5", text: "#476b8b" },
@@ -55,10 +56,8 @@ export default function App() {
       minHeight: "100vh",
       width: "100%",
       display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: "#D9D5C7",
-      padding: "40px 16px",
+      flexDirection: "column",
+      backgroundColor: "#fffbf0",
       fontFamily: "'Noto Sans TC', 'Segoe UI', sans-serif"
     }}>
       <style>{`
@@ -66,53 +65,25 @@ export default function App() {
         
         * { box-sizing: border-box; }
         
-        .phone-frame {
-          position: relative;
-          background: #1c1c1c;
-          border-radius: 44px;
-          padding: 10px;
-          box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-          width: 360px;
-          height: 720px;
-          overflow: hidden;
-        }
-        
-        .phone-frame::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 112px;
-          height: 24px;
-          background: #1c1c1c;
-          border-radius: 0 0 32px 32px;
-          z-index: 10;
-        }
-        
-        .phone-inner {
-          width: 100%;
-          height: 100%;
-          background: #fffbf0;
-          border-radius: 36px;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
+        body, html {
+          margin: 0;
+          padding: 0;
         }
         
         .status-bar {
-          padding: 6px 16px;
+          padding: 8px 16px;
           font-size: 12px;
           color: #232323;
           display: flex;
           justify-content: space-between;
           font-family: 'JetBrains Mono';
-          padding-top: 20px;
+          background: #fffbf0;
         }
         
         .header {
           padding: 12px 16px;
           border-bottom: 1px dashed #d4ccc5;
+          background: #fffbf0;
         }
         
         .header h1 {
@@ -133,6 +104,8 @@ export default function App() {
           display: flex;
           border-top: 1px dashed #d4ccc5;
           background: #F5F3EC;
+          gap: 0;
+          padding-bottom: max(env(safe-area-inset-bottom), 0);
         }
         
         .tab-btn {
@@ -155,59 +128,55 @@ export default function App() {
         }
       `}</style>
 
-      <div className="phone-frame">
-        <div className="phone-inner">
-          <div className="status-bar">
-            <span>{new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", hour12: false })}</span>
-            <span>個人秘書</span>
-          </div>
+      <div className="status-bar">
+        <span>{new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", hour12: false })}</span>
+        <span>個人秘書</span>
+      </div>
 
-          <div className="header">
-            <h1>{CATS[tab].label}</h1>
-          </div>
+      <div className="header">
+        <h1>{CATS[tab].label}</h1>
+      </div>
 
-          <div className="content">
-            {tab === "finance" ? (
-              <FinancePanel />
-            ) : tab === "schedule" ? (
-              <SchedulePanel />
-            ) : (
-              <IdeaPanel />
-            )}
-          </div>
+      <div className="content">
+        {tab === "finance" ? (
+          <FinancePanel />
+        ) : tab === "schedule" ? (
+          <SchedulePanel />
+        ) : (
+          <IdeaPanel />
+        )}
+      </div>
 
-          <div className="tab-bar">
-            {Object.entries(CATS).map(([key, c]) => {
-              const Icon = c.icon;
-              const active = tab === key;
-              return (
-                <button
-                  key={key}
-                  onClick={() => setTab(key)}
-                  className={`tab-btn ${active ? "active" : ""}`}
-                  style={{ color: active ? c.color : "#9b9686" }}
-                >
-                  <Icon size={20} strokeWidth={active ? 2.4 : 1.8} />
-                  <span>{c.label}</span>
-                  <span
-                    style={{
-                      width: 4,
-                      height: 4,
-                      borderRadius: "50%",
-                      backgroundColor: active ? c.color : "transparent",
-                    }}
-                  />
-                </button>
-              );
-            })}
-          </div>
-        </div>
+      <div className="tab-bar">
+        {Object.entries(CATS).map(([key, c]) => {
+          const Icon = c.icon;
+          const active = tab === key;
+          return (
+            <button
+              key={key}
+              onClick={() => setTab(key)}
+              className={`tab-btn ${active ? "active" : ""}`}
+              style={{ color: active ? c.color : "#9b9686" }}
+            >
+              <Icon size={20} strokeWidth={active ? 2.4 : 1.8} />
+              <span>{c.label}</span>
+              <span
+                style={{
+                  width: 4,
+                  height: 4,
+                  borderRadius: "50%",
+                  backgroundColor: active ? c.color : "transparent",
+                }}
+              />
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-/* ==================== 記帳頁面 ==================== */
+/* ==================== 記帳頁面（新設計） ==================== */
 function FinancePanel() {
   const [expenseType, setExpenseType] = useState("支出");
   const [date, setDate] = useState(todayStr());
@@ -290,6 +259,11 @@ function FinancePanel() {
     }
   }
 
+  const monthTotal = useMemo(
+    () => expenses.reduce((s, e) => s + (e.amount || 0), 0),
+    [expenses]
+  );
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       {/* 訊息提示 */}
@@ -305,6 +279,17 @@ function FinancePanel() {
           {message}
         </div>
       )}
+
+      {/* 本月支出 */}
+      <div style={{
+        backgroundColor: "white",
+        border: "0.5px solid #d4ccc5",
+        borderRadius: "8px",
+        padding: "12px 16px",
+      }}>
+        <p style={{ fontSize: "12px", color: "#888", margin: "0 0 4px 0" }}>本月支出</p>
+        <p style={{ fontSize: "24px", fontWeight: "600", color: "#2c2c2a", margin: "0" }}>NT$ {monthTotal.toLocaleString()}</p>
+      </div>
 
       {/* 支出/收入 切換 */}
       <div style={{ display: "flex", gap: "8px" }}>
@@ -486,7 +471,7 @@ function FinancePanel() {
   );
 }
 
-/* ==================== 行程頁面 ==================== */
+/* ==================== 行程頁面（保持原樣） ==================== */
 function SchedulePanel() {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState(todayStr());
@@ -574,7 +559,7 @@ function SchedulePanel() {
   );
 }
 
-/* ==================== 靈感頁面 ==================== */
+/* ==================== 靈感頁面（保持原樣） ==================== */
 function IdeaPanel() {
   const [text, setText] = useState("");
   const [tag, setTag] = useState("");
