@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Wallet, CalendarDays, Lightbulb, Plus, Trash2, Clock, MapPin, Tag } from "lucide-react";
 
 // 後端 API 基礎網址（本機開發用 localhost:5000）
-const API_BASE = "http://secretary-bot-backend-production.up.railway.app";
+const API_BASE = "https://secretary-bot-backend-production.up.railway.app";
 
 const CATS = {
   finance: {
