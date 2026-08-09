@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Wallet, CalendarDays, Lightbulb, Plus, Trash2, Clock, MapPin, Tag } from "lucide-react";
+import { Wallet, CalendarDays, Lightbulb } from "lucide-react";
 
 const API_BASE = "https://secretary-bot-backend-production.up.railway.app/api";
 
@@ -176,7 +176,7 @@ export default function App() {
   );
 }
 
-/* ==================== 記帳頁面（新設計） ==================== */
+/* ==================== 記帳頁面（完整計算器版本） ==================== */
 function FinancePanel() {
   const [expenseType, setExpenseType] = useState("支出");
   const [date, setDate] = useState(todayStr());
@@ -186,6 +186,11 @@ function FinancePanel() {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  
+  // 計算器狀態
+  const [firstValue, setFirstValue] = useState(null);
+  const [operator, setOperator] = useState(null);
+  const [newNumber, setNewNumber] = useState(true);
 
   useEffect(() => {
     fetchExpenses();
@@ -203,22 +208,71 @@ function FinancePanel() {
     }
   }
 
+  // ==================== 計算器邏輯 ====================
+  
   function handleNumberClick(num) {
-    if (amount === "0") {
+    if (newNumber) {
       setAmount(String(num));
+      setNewNumber(false);
     } else {
-      setAmount(amount + String(num));
+      setAmount(amount === "0" ? String(num) : amount + String(num));
     }
   }
 
   function handleDecimal() {
     if (!amount.includes(".")) {
       setAmount(amount + ".");
+      setNewNumber(false);
+    }
+  }
+
+  function handleOperator(op) {
+    const currentValue = parseFloat(amount);
+
+    if (firstValue === null) {
+      setFirstValue(currentValue);
+    } else if (operator) {
+      // 執行前一個計算
+      const result = calculate(firstValue, currentValue, operator);
+      setAmount(String(result));
+      setFirstValue(result);
+    }
+
+    setOperator(op);
+    setNewNumber(true);
+  }
+
+  function calculate(first, second, op) {
+    switch (op) {
+      case "+":
+        return first + second;
+      case "-":
+        return first - second;
+      case "*":
+        return first * second;
+      case "/":
+        return second !== 0 ? first / second : first;
+      default:
+        return second;
+    }
+  }
+
+  function handleEquals() {
+    if (firstValue !== null && operator) {
+      const currentValue = parseFloat(amount);
+      const result = calculate(firstValue, currentValue, operator);
+      setAmount(String(result));
+      setFirstValue(null);
+      setOperator(null);
+      setNewNumber(true);
     }
   }
 
   function handleAC() {
     setAmount("0");
+    setFirstValue(null);
+    setOperator(null);
+    setNewNumber(true);
   }
 
   async function handleRecord() {
@@ -247,6 +301,9 @@ function FinancePanel() {
         setAmount("0");
         setNote("");
         setDate(todayStr());
+        setFirstValue(null);
+        setOperator(null);
+        setNewNumber(true);
         setTimeout(() => setMessage(""), 3000);
         fetchExpenses();
       } else {
@@ -403,7 +460,7 @@ function FinancePanel() {
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontSize: "16px", color: "#888" }}>$</span>
-          <span style={{ fontSize: "28px", fontWeight: "600", color: "#2c2c2a" }}>{amount}</span>
+          <span style={{ fontSize: "28px", fontWeight: "600", color: "#2c2c2a" }}>{amount === "0" ? "0" : amount}</span>
           <button
             onClick={handleAC}
             style={{
@@ -422,30 +479,31 @@ function FinancePanel() {
         </div>
       </div>
 
-      {/* 計算器 */}
+      {/* 計算器 - 4x4 網格 */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "6px" }}>
         {/* 第一行 */}
         <button onClick={() => handleNumberClick(7)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>7</button>
         <button onClick={() => handleNumberClick(8)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>8</button>
         <button onClick={() => handleNumberClick(9)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>9</button>
-        <button style={{ padding: "14px", backgroundColor: "#b4a7d6", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#5a5a7a", cursor: "pointer" }}>÷</button>
+        <button onClick={() => handleOperator("/")} style={{ padding: "14px", backgroundColor: "#b4a7d6", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#5a5a7a", cursor: "pointer" }}>÷</button>
 
         {/* 第二行 */}
         <button onClick={() => handleNumberClick(4)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>4</button>
         <button onClick={() => handleNumberClick(5)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>5</button>
         <button onClick={() => handleNumberClick(6)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>6</button>
-        <button style={{ padding: "14px", backgroundColor: "#b4a7d6", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#5a5a7a", cursor: "pointer" }}>×</button>
+        <button onClick={() => handleOperator("*")} style={{ padding: "14px", backgroundColor: "#b4a7d6", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#5a5a7a", cursor: "pointer" }}>×</button>
 
         {/* 第三行 */}
         <button onClick={() => handleNumberClick(1)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>1</button>
         <button onClick={() => handleNumberClick(2)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>2</button>
         <button onClick={() => handleNumberClick(3)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>3</button>
-        <button style={{ padding: "14px", backgroundColor: "#b4a7d6", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#5a5a7a", cursor: "pointer" }}>−</button>
+        <button onClick={() => handleOperator("-")} style={{ padding: "14px", backgroundColor: "#b4a7d6", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#5a5a7a", cursor: "pointer" }}>−</button>
 
         {/* 第四行 */}
         <button onClick={() => handleNumberClick(0)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>0</button>
         <button onClick={handleDecimal} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>.</button>
-        <button onClick={handleRecord} style={{ gridColumn: "span 2", padding: "14px", backgroundColor: "#5eb3d6", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "white", cursor: "pointer" }}>=</button>
+        <button onClick={() => handleOperator("+")} style={{ padding: "14px", backgroundColor: "#b4a7d6", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#5a5a7a", cursor: "pointer" }}>+</button>
+        <button onClick={handleEquals} style={{ padding: "14px", backgroundColor: "#5eb3d6", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "white", cursor: "pointer" }}>=</button>
       </div>
 
       {/* 記錄按鈕 */}
