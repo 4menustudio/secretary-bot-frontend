@@ -1,7 +1,3 @@
-// ⚠️ 重要：这是改写后的 App.jsx
-// 修改范围：仅 FinancePanel 组件重新设计
-// 不涉及：SchedulePanel（行程）和 IdeaPanel（灵感）- 代码完全保持原样
-
 import React, { useState, useEffect, useMemo } from "react";
 import { Wallet, CalendarDays, Lightbulb, Plus, Trash2, Clock, MapPin, Tag } from "lucide-react";
 
@@ -30,7 +26,6 @@ const CATS = {
 
 const EXPENSE_TAGS = ["餐飲", "交通", "生活", "娛樂", "醫療", "其他"];
 
-// 分类颜色配置（新设计多色）
 const CATEGORY_COLORS = {
   "餐飲": { bg: "#f5d4a3", text: "#8b6f47" },
   "交通": { bg: "#a3d4f5", text: "#476b8b" },
@@ -212,9 +207,9 @@ export default function App() {
   );
 }
 
-/* ==================== 記帳頁面（新設計） ==================== */
+/* ==================== 記帳頁面 ==================== */
 function FinancePanel() {
-  const [expenseType, setExpenseType] = useState("支出"); // 支出/收入
+  const [expenseType, setExpenseType] = useState("支出");
   const [date, setDate] = useState(todayStr());
   const [note, setNote] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(EXPENSE_TAGS[0]);
@@ -239,18 +234,12 @@ function FinancePanel() {
     }
   }
 
-  // 計算器邏輯
   function handleNumberClick(num) {
     if (amount === "0") {
       setAmount(String(num));
     } else {
       setAmount(amount + String(num));
     }
-  }
-
-  function handleOperator(op) {
-    // 簡化版計算（實際應該用更完整的計算邏輯）
-    // 這裡保留為基礎版本
   }
 
   function handleDecimal() {
@@ -454,19 +443,19 @@ function FinancePanel() {
         <button onClick={() => handleNumberClick(7)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>7</button>
         <button onClick={() => handleNumberClick(8)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>8</button>
         <button onClick={() => handleNumberClick(9)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>9</button>
-        <button onClick={() => handleOperator("÷")} style={{ padding: "14px", backgroundColor: "#b4a7d6", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#5a5a7a", cursor: "pointer" }}>÷</button>
+        <button style={{ padding: "14px", backgroundColor: "#b4a7d6", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#5a5a7a", cursor: "pointer" }}>÷</button>
 
         {/* 第二行 */}
         <button onClick={() => handleNumberClick(4)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>4</button>
         <button onClick={() => handleNumberClick(5)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>5</button>
         <button onClick={() => handleNumberClick(6)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>6</button>
-        <button onClick={() => handleOperator("×")} style={{ padding: "14px", backgroundColor: "#b4a7d6", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#5a5a7a", cursor: "pointer" }}>×</button>
+        <button style={{ padding: "14px", backgroundColor: "#b4a7d6", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#5a5a7a", cursor: "pointer" }}>×</button>
 
         {/* 第三行 */}
         <button onClick={() => handleNumberClick(1)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>1</button>
         <button onClick={() => handleNumberClick(2)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>2</button>
         <button onClick={() => handleNumberClick(3)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>3</button>
-        <button onClick={() => handleOperator("−")} style={{ padding: "14px", backgroundColor: "#b4a7d6", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#5a5a7a", cursor: "pointer" }}>−</button>
+        <button style={{ padding: "14px", backgroundColor: "#b4a7d6", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#5a5a7a", cursor: "pointer" }}>−</button>
 
         {/* 第四行 */}
         <button onClick={() => handleNumberClick(0)} style={{ padding: "14px", backgroundColor: "#e8c4d0", border: "none", borderRadius: "6px", fontSize: "18px", fontWeight: "600", color: "#8b5a5a", cursor: "pointer" }}>0</button>
@@ -493,29 +482,11 @@ function FinancePanel() {
       >
         {loading ? "記錄中..." : "記錄"}
       </button>
-
-      {/* 記錄列表 */}
-      <div style={{ maxHeight: "200px", overflowY: "auto", marginTop: "8px" }}>
-        <p style={{ fontSize: "12px", color: "#888", margin: "0 0 8px 0", fontWeight: "500" }}>近期記錄</p>
-        {expenses.length === 0 && <p style={{ fontSize: "12px", color: "#9b9686", textAlign: "center", padding: "16px 0" }}>還沒有任何記帳紀錄</p>}
-        {expenses.slice(-5).reverse().map((e) => (
-          <div key={e.id} style={{
-            display: "flex",
-            justifyContent: "space-between",
-            padding: "8px",
-            borderBottom: "0.5px solid #e8e4dc",
-            fontSize: "12px"
-          }}>
-            <span style={{ color: "#2c2c2a" }}>{e.note || e.category}</span>
-            <span style={{ color: "#888" }}>NT$ {e.amount?.toLocaleString()}</span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
 
-/* ==================== 行程頁面（保持原樣） ==================== */
+/* ==================== 行程頁面 ==================== */
 function SchedulePanel() {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState(todayStr());
@@ -603,7 +574,7 @@ function SchedulePanel() {
   );
 }
 
-/* ==================== 靈感頁面（保持原樣） ==================== */
+/* ==================== 靈感頁面 ==================== */
 function IdeaPanel() {
   const [text, setText] = useState("");
   const [tag, setTag] = useState("");
